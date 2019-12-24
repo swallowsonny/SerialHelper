@@ -39,3 +39,27 @@ dependencies {
 
     implementation 'com.github.mik3y:usb-serial-for-android:2.1.0'
 }
+
+//从这里开始配置
+apply plugin: 'com.novoda.bintray-release'
+publish {
+    repoName="ext"//仓库名 你的仓库名称，没有填写默认仓库是maven//这也是很多人上传仓库不对名问题最多情况，
+    userOrg = 'swallowsonny'      //bintray注册的用户名
+    groupId = 'com.swallowsonny'         //compile引用时的第1部分groupId
+    artifactId = 'serialhelper'     //compile引用时的第2部分项目名
+    publishVersion = '1.0.0'    //compile引用时的第3部分版本号
+    desc = '一个简单易用的Android串口通讯框架'//项目描述
+    website = 'https://github.com/swallowsonny/SerialHelper' //github 托管地址
+}
+allprojects {
+    repositories {
+        jcenter()
+    }
+    //加上这些
+    tasks.withType(Javadoc) {
+        options{ encoding "UTF-8"
+            charSet 'UTF-8'
+            links "http://docs.oracle.com/javase/7/docs/api"
+        }
+    }
+}
