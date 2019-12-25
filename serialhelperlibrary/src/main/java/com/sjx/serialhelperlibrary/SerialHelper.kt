@@ -144,7 +144,7 @@ abstract class SerialHelper : CheckFullFrame {
             }
             lastReceiveTime = System.currentTimeMillis()
             dataArray.addAll(data.toList())
-            if (isFullFrame(dataArray)){
+            if (isFullFrame(dataArray.toByteArray())){
                 onUsbDataListeners.forEach { it.onDataReceived(dataArray.toByteArray()) }
             }
         }

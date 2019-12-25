@@ -24,7 +24,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         serialHelper =object : SerialHelper(){
-            override fun isFullFrame(data: ArrayList<Byte>): Boolean {
+            override fun isFullFrame(data: ByteArray): Boolean {
 
                 return true
             }

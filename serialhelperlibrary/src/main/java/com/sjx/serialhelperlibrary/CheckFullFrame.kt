@@ -1,5 +1,5 @@
 package com.sjx.serialhelperlibrary
 
 interface CheckFullFrame {
-    fun isFullFrame(data: ArrayList<Byte>): Boolean
+    fun isFullFrame(data: ByteArray): Boolean
 }
