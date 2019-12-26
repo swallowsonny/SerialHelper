@@ -207,7 +207,10 @@ abstract class SerialHelper : CheckFullFrame {
     }
 
     fun removeOnUsbStatusChangeListener(onUsbStatusChangeListener: OnUsbStatusChangeListener) {
-        onUsbStatusChangeListeners.remove(onUsbStatusChangeListener)
+        val index = onUsbStatusChangeListeners.indexOf(onUsbStatusChangeListener)
+        if(index != -1){
+            onUsbStatusChangeListeners.removeAt(index)
+        }
     }
 
     fun removeAllUsbStatusChangeListener() {
@@ -219,7 +222,10 @@ abstract class SerialHelper : CheckFullFrame {
     }
 
     fun removeOnUsbDataListener(onUsbDataListener: OnUsbDataListener) {
-        onUsbDataListeners.remove(onUsbDataListener)
+        val index = onUsbDataListeners.indexOf(onUsbDataListener)
+        if(index != -1){
+            onUsbDataListeners.removeAt(index)
+        }
     }
 
     fun removeAllUsbDataListener() {
