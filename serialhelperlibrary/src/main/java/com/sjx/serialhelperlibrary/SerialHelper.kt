@@ -138,7 +138,7 @@ abstract class SerialHelper : CheckFullFrame {
         override fun onNewData(data: ByteArray?) {
             if (data == null) return;
             println(data.joinToString())
-            if (System.currentTimeMillis() - lastReceiveTime > 20) {
+            if (System.currentTimeMillis() - lastReceiveTime > serialConfig.intervalFrame) {
                 // 超时
                 dataArray.clear()
             }

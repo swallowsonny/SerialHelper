@@ -9,6 +9,8 @@ public class SerialConfig {
     private int stopBits = UsbSerialPort.STOPBITS_1;
     private int parity = UsbSerialPort.PARITY_NONE;
 
+    private long intervalFrame = 50L;
+
     private int timeout = 2000;
 
     private boolean dtr = true;
@@ -84,6 +86,15 @@ public class SerialConfig {
 
     public SerialConfig setTimeout(int timeout) {
         this.timeout = timeout;
+        return this;
+    }
+
+    public long getIntervalFrame() {
+        return intervalFrame;
+    }
+
+    public SerialConfig setIntervalFrame(long intervalFrame) {
+        this.intervalFrame = intervalFrame;
         return this;
     }
 }
