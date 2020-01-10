@@ -14,6 +14,7 @@ import com.hoho.android.usbserial.driver.UsbSerialPort
 import com.hoho.android.usbserial.driver.UsbSerialProber
 import com.hoho.android.usbserial.util.SerialInputOutputManager
 import java.io.IOException
+import java.lang.IllegalArgumentException
 import java.util.concurrent.Executors
 
 abstract class SerialHelper : CheckFullFrame {
@@ -92,7 +93,11 @@ abstract class SerialHelper : CheckFullFrame {
             return
         }
         // 连接第一个可用的驱动
-        val driver = availableDrivers[0]
+        val driver = availableDrivers.find { it.device == usbDevice }
+        if (driver == null){
+            onUsbStatusChangeListeners.forEach { it.onUsbConnectError(IllegalArgumentException("未找到该设备")) }
+            return
+        }
         try {
             connection = usbManager?.openDevice(driver.device)
             if (connection == null) {

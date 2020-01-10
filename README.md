@@ -2,7 +2,7 @@
 
 > 一个基于[usb-serial-for-android](https://github.com/mik3y/usb-serial-for-android "usb-serial-for-android")封装的Android串口通讯框架, 搭配[ConvertExt](https://github.com/swallowsonny/ConvertExt)实现ByteArray与基本数据类型的快速高效解析转换
 
-[![Download](https://api.bintray.com/packages/swallowsonny/ext/serialhelper/images/download.svg?version=1.0.3) ](https://bintray.com/swallowsonny/ext/serialhelper/1.0.3/link)
+[![Download](https://api.bintray.com/packages/swallowsonny/ext/serialhelper/images/download.svg?version=1.0.4) ](https://bintray.com/swallowsonny/ext/serialhelper/1.0.3/link)
 ### 功能简介
 - 框架处理权限请求问题
 - 波特率设置
@@ -27,7 +27,7 @@ maven {
 
 - 在app的build.gradle中添加
 ```
-implementation 'com.swallowsonny:serialhelper:1.0.3'
+implementation 'com.swallowsonny:serialhelper:1.0.4'
 ```
 
 - 在res/xml目录中添加[device_filter.xml](https://github.com/swallowsonny/SerialHelper/blob/master/app/src/main/res/xml/device_filter.xml)
