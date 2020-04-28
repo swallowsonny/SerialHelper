@@ -10,6 +10,7 @@ import android.hardware.usb.UsbDeviceConnection
 import android.hardware.usb.UsbManager
 import android.os.Handler
 import android.os.Parcelable
+import android.os.SystemClock
 import com.hoho.android.usbserial.driver.UsbSerialPort
 import com.hoho.android.usbserial.driver.UsbSerialProber
 import com.hoho.android.usbserial.util.SerialInputOutputManager
@@ -17,8 +18,8 @@ import java.io.IOException
 import java.lang.IllegalArgumentException
 import java.util.concurrent.Executors
 
-abstract class SerialHelper : CheckFullFrame {
-//    private val WRITE_WAIT_MILLIS = 2000 // 0 blocked infinitely on unprogrammed arduino
+abstract class SerialHelper(serialConfig: SerialConfig) : CheckFullFrame {
+    //    private val WRITE_WAIT_MILLIS = 2000 // 0 blocked infinitely on unprogrammed arduino
     private val ACTION_USB_PERMISSION = "com.sjx.serialhelperlibrary.USB_PERMISSION"
     private val onUsbStatusChangeListeners = ArrayList<OnUsbStatusChangeListener>()
     private val onUsbDataListeners = ArrayList<OnUsbDataListener>()
@@ -28,6 +29,75 @@ abstract class SerialHelper : CheckFullFrame {
     private var usbSerialPort: UsbSerialPort? = null
     private var usbIoManager: SerialInputOutputManager? = null
     private var connection: UsbDeviceConnection? = null
+    // 添加双缓冲，提升效率
+    private var mDoubleBuffer: Array<ByteArray?>
+    private var mDoubleBufferSize = 0
+    // 读取位置，写入位置
+    private var writePosition = 0L // 写入位置
+    private var readPosition = 0L  // 读取位置
+
+    init {
+        this.serialConfig = serialConfig
+        mDoubleBuffer = arrayOfNulls(serialConfig.doubleBufferSize)
+        mDoubleBufferSize = serialConfig.doubleBufferSize
+        initThread()
+    }
+
+    private lateinit var mThread: Thread
+    private fun initThread() {
+        mThread = object : Thread() {
+            override fun run() {
+                // 释放
+                var byteArray = byteArrayOf()
+                while (true) {
+                    if (readPosition < writePosition) {
+                        // 写入
+                        mDoubleBuffer[(readPosition++ % mDoubleBufferSize).toInt()]?.copyInto(
+                            byteArray,
+                            byteArray.size
+                        )
+                        // 判断数据完整性, 返回结束和开始索引号
+                        val result = isFullFrame(byteArray)
+                        if (result.size == 2) {
+                            if (result[0] == -1) {
+                                // 头没找到，全部数据没用，不严谨，如果头分开了也删除了，几率很小
+                                byteArray = byteArrayOf()
+                            } else if(result[1] != -1) { // 找到头，也找到尾
+                                onUsbDataListeners.forEach {
+                                    it.onDataReceived(byteArray.copyOfRange(result[0], result[1]))
+                                }
+                                // 清空byteArray，清除
+                                byteArray = byteArray.copyOfRange(result[1], byteArray.size)
+                            }
+                            // 找到头，未找到尾，需要继续拼接
+                        } else if (byteArray.size > serialConfig.dataMaxSize) {
+                            byteArray = byteArrayOf()
+                        }
+                    } else if (byteArray.isNotEmpty()) {
+                        // 读取不完
+                        val result = isFullFrame(byteArray)
+                        if (result.size == 2) {
+                            if (result[0] == -1) {
+                                // 头没找到，全部数据没用，不严谨，如果头分开了也删除了，几率很小
+                                byteArray = byteArrayOf()
+                            } else if(result[1] != -1) { // 找到头，也找到尾
+                                onUsbDataListeners.forEach {
+                                    it.onDataReceived(byteArray.copyOfRange(result[0], result[1]))
+                                }
+                                // 清空byteArray，清除
+                                byteArray = byteArray.copyOfRange(result[1], byteArray.size)
+                            }
+                        } else {
+                            byteArray = byteArrayOf()
+                        }
+                    }
+                    SystemClock.sleep(serialConfig.readInterval)
+                }
+            }
+        }
+        mThread.start()
+    }
+
 
     private val mUsbPermissionActionReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -94,7 +164,7 @@ abstract class SerialHelper : CheckFullFrame {
         }
         // 连接第一个可用的驱动
         val driver = availableDrivers.find { it.device == usbDevice }
-        if (driver == null){
+        if (driver == null) {
             onUsbStatusChangeListeners.forEach { it.onUsbConnectError(IllegalArgumentException("未找到该设备")) }
             return
         }
@@ -133,29 +203,22 @@ abstract class SerialHelper : CheckFullFrame {
         }
     }
 
-    private var lastReceiveTime: Long = 0
-    private val dataArray = ArrayList<Byte>()
+    //    private var lastReceiveTime: Long = 0
+//    private val dataArray = ArrayList<Byte>()
     private val serialManagerListener = object : SerialInputOutputManager.Listener {
         override fun onRunError(e: Exception?) {
             onUsbDataListeners.forEach { it.onDataError(e) }
         }
 
         override fun onNewData(data: ByteArray?) {
-            if (data == null) return;
-            println(data.joinToString())
-            if (System.currentTimeMillis() - lastReceiveTime > serialConfig.intervalFrame) {
-                // 超时
-                dataArray.clear()
-            }
-            lastReceiveTime = System.currentTimeMillis()
-            dataArray.addAll(data.toList())
-            if (isFullFrame(dataArray.toByteArray())){
-                onUsbDataListeners.forEach { it.onDataReceived(dataArray.toByteArray()) }
+            synchronized(this) {
+                if (data == null) return
+                mDoubleBuffer[(writePosition++ % mDoubleBufferSize).toInt()] = data
             }
         }
     }
 
-    fun write(byteArray: ByteArray){
+    fun write(byteArray: ByteArray) {
         usbSerialPort?.write(byteArray, serialConfig.timeout)
     }
 
@@ -195,13 +258,15 @@ abstract class SerialHelper : CheckFullFrame {
         // 连接设备
         Handler().postDelayed({
             val devices = getAllDevices()
-            if (devices != null && devices.isNotEmpty()){
+            if (devices != null && devices.isNotEmpty()) {
                 requestPermission()
             }
         }, 100)
     }
 
     fun onDestory() {
+        mThread.interrupt()
+        mThread.join()
         mContext?.unregisterReceiver(mUsbPermissionActionReceiver)
         disconnectDevice()
         onUsbStatusChangeListeners.clear()
@@ -213,7 +278,7 @@ abstract class SerialHelper : CheckFullFrame {
 
     fun removeOnUsbStatusChangeListener(onUsbStatusChangeListener: OnUsbStatusChangeListener) {
         val index = onUsbStatusChangeListeners.indexOf(onUsbStatusChangeListener)
-        if(index != -1){
+        if (index != -1) {
             onUsbStatusChangeListeners.removeAt(index)
         }
     }
@@ -228,7 +293,7 @@ abstract class SerialHelper : CheckFullFrame {
 
     fun removeOnUsbDataListener(onUsbDataListener: OnUsbDataListener) {
         val index = onUsbDataListeners.indexOf(onUsbDataListener)
-        if(index != -1){
+        if (index != -1) {
             onUsbDataListeners.removeAt(index)
         }
     }

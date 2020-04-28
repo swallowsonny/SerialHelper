@@ -8,6 +8,9 @@ public class SerialConfig {
     private int dataBits = 8;
     private int stopBits = UsbSerialPort.STOPBITS_1;
     private int parity = UsbSerialPort.PARITY_NONE;
+    private int dataMaxSize = 30000;
+    private int doubleBufferSize = 30; // 30个大小
+    private Long readInterval = 10L; // 10ms
 
     private long intervalFrame = 50L;
 
@@ -96,5 +99,29 @@ public class SerialConfig {
     public SerialConfig setIntervalFrame(long intervalFrame) {
         this.intervalFrame = intervalFrame;
         return this;
+    }
+
+    public int getDataMaxSize() {
+        return dataMaxSize;
+    }
+
+    public void setDataMaxSize(int dataMaxSize) {
+        this.dataMaxSize = dataMaxSize;
+    }
+
+    public int getDoubleBufferSize() {
+        return doubleBufferSize;
+    }
+
+    public void setDoubleBufferSize(int doubleBufferSize) {
+        this.doubleBufferSize = doubleBufferSize;
+    }
+
+    public Long getReadInterval() {
+        return readInterval;
+    }
+
+    public void setReadInterval(Long readInterval) {
+        this.readInterval = readInterval;
     }
 }
