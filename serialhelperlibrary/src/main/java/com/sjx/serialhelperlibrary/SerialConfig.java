@@ -8,11 +8,9 @@ public class SerialConfig {
     private int dataBits = 8;
     private int stopBits = UsbSerialPort.STOPBITS_1;
     private int parity = UsbSerialPort.PARITY_NONE;
-    private int dataMaxSize = 30000;
-    private int doubleBufferSize = 30; // 30个大小
-    private Long readInterval = 10L; // 10ms
-
-    private long intervalFrame = 50L;
+    private int dataMaxSize = 30000; // 未满足要求的最大字节数，超过就清空
+    private int doubleBufferSize = 30; // 30个大小, 双缓冲的容器大小
+    private Long readInterval = 10L; // 读取休眠间隔，单位ms，这个值不能太大，读取速度要大于写入速度
 
     private int timeout = 2000;
 
@@ -89,15 +87,6 @@ public class SerialConfig {
 
     public SerialConfig setTimeout(int timeout) {
         this.timeout = timeout;
-        return this;
-    }
-
-    public long getIntervalFrame() {
-        return intervalFrame;
-    }
-
-    public SerialConfig setIntervalFrame(long intervalFrame) {
-        this.intervalFrame = intervalFrame;
         return this;
     }
 

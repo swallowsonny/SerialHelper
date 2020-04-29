@@ -4,13 +4,11 @@ apply plugin: 'kotlin-android-extensions'
 android {
     compileSdkVersion 29
 
-
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 5
-        versionName "1.0.4"
-
+        versionCode 6
+        versionName "2.0.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
     }
@@ -37,7 +35,7 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
 
-    implementation 'com.github.mik3y:usb-serial-for-android:2.1.0'
+    implementation 'com.github.mik3y:usb-serial-for-android:2.2.2'
 }
 
 //从这里开始配置
@@ -47,7 +45,7 @@ publish {
     userOrg = 'swallowsonny'      //bintray注册的用户名
     groupId = 'com.swallowsonny'         //compile引用时的第1部分groupId
     artifactId = 'serialhelper'     //compile引用时的第2部分项目名
-    publishVersion = '1.0.4'    //compile引用时的第3部分版本号
+    publishVersion = '2.0.0'    //compile引用时的第3部分版本号
     desc = '一个简单易用的Android串口通讯框架'//项目描述
     website = 'https://github.com/swallowsonny/SerialHelper' //github 托管地址
 }

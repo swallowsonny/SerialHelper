@@ -19,7 +19,6 @@ import java.lang.IllegalArgumentException
 import java.util.concurrent.Executors
 
 abstract class SerialHelper(serialConfig: SerialConfig) : CheckFullFrame {
-    //    private val WRITE_WAIT_MILLIS = 2000 // 0 blocked infinitely on unprogrammed arduino
     private val ACTION_USB_PERMISSION = "com.sjx.serialhelperlibrary.USB_PERMISSION"
     private val onUsbStatusChangeListeners = ArrayList<OnUsbStatusChangeListener>()
     private val onUsbDataListeners = ArrayList<OnUsbDataListener>()
@@ -51,20 +50,26 @@ abstract class SerialHelper(serialConfig: SerialConfig) : CheckFullFrame {
                 var byteArray = byteArrayOf()
                 while (true) {
                     if (readPosition < writePosition) {
-                        // 写入
-                        mDoubleBuffer[(readPosition++ % mDoubleBufferSize).toInt()]?.copyInto(
-                            byteArray,
-                            byteArray.size
-                        )
+//                        // 写入
+                        val indexBuffer =
+                            mDoubleBuffer[(readPosition++ % mDoubleBufferSize).toInt()] ?: continue
+                        val bytes = ByteArray(byteArray.size + indexBuffer.size)
+
+                        // 组合数据
+                        byteArray.copyInto(bytes)
+                        indexBuffer.copyInto(bytes, byteArray.size)
+                        byteArray = bytes
                         // 判断数据完整性, 返回结束和开始索引号
                         val result = isFullFrame(byteArray)
                         if (result.size == 2) {
                             if (result[0] == -1) {
                                 // 头没找到，全部数据没用，不严谨，如果头分开了也删除了，几率很小
                                 byteArray = byteArrayOf()
-                            } else if(result[1] != -1) { // 找到头，也找到尾
+                            } else if (result[1] != -1) { // 找到头，也找到尾
                                 onUsbDataListeners.forEach {
-                                    it.onDataReceived(byteArray.copyOfRange(result[0], result[1]))
+                                    val temp = byteArray.copyOfRange(result[0], result[1])
+//                                    println("收到数据" + Utils.toHexString(temp))
+                                    it.onDataReceived(temp)
                                 }
                                 // 清空byteArray，清除
                                 byteArray = byteArray.copyOfRange(result[1], byteArray.size)
@@ -80,7 +85,7 @@ abstract class SerialHelper(serialConfig: SerialConfig) : CheckFullFrame {
                             if (result[0] == -1) {
                                 // 头没找到，全部数据没用，不严谨，如果头分开了也删除了，几率很小
                                 byteArray = byteArrayOf()
-                            } else if(result[1] != -1) { // 找到头，也找到尾
+                            } else if (result[1] != -1) { // 找到头，也找到尾
                                 onUsbDataListeners.forEach {
                                     it.onDataReceived(byteArray.copyOfRange(result[0], result[1]))
                                 }
@@ -97,7 +102,6 @@ abstract class SerialHelper(serialConfig: SerialConfig) : CheckFullFrame {
         }
         mThread.start()
     }
-
 
     private val mUsbPermissionActionReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -128,11 +132,6 @@ abstract class SerialHelper(serialConfig: SerialConfig) : CheckFullFrame {
                 }
             }
         }
-    }
-
-    fun initConfig(serialConfig: SerialConfig): SerialHelper {
-        this.serialConfig = serialConfig
-        return this
     }
 
     private fun requestPermission() {
@@ -203,18 +202,14 @@ abstract class SerialHelper(serialConfig: SerialConfig) : CheckFullFrame {
         }
     }
 
-    //    private var lastReceiveTime: Long = 0
-//    private val dataArray = ArrayList<Byte>()
     private val serialManagerListener = object : SerialInputOutputManager.Listener {
         override fun onRunError(e: Exception?) {
             onUsbDataListeners.forEach { it.onDataError(e) }
         }
 
         override fun onNewData(data: ByteArray?) {
-            synchronized(this) {
-                if (data == null) return
-                mDoubleBuffer[(writePosition++ % mDoubleBufferSize).toInt()] = data
-            }
+            if (data == null) return
+            mDoubleBuffer[(writePosition++ % mDoubleBufferSize).toInt()] = data
         }
     }
 
