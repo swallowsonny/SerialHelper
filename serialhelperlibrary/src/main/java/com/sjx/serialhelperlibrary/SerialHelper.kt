@@ -121,7 +121,7 @@ abstract class SerialHelper(serialConfig: SerialConfig) : CheckFullFrame {
                     if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
                         // 用户点击确定，拥有权限
                         onUsbStatusChangeListeners.forEach { it.onPermissionGranted() }
-                        if (serialConfig.isAutoConnect) {
+                        if (serialConfig.autoConnect) {
                             // 连接设备
                             connectDevice(usbDevice)
                         }
@@ -140,7 +140,7 @@ abstract class SerialHelper(serialConfig: SerialConfig) : CheckFullFrame {
         usbManager?.let {
             for (usbDevice in it.deviceList.values) {
                 if (it.hasPermission(usbDevice)) {
-                    if (serialConfig.isAutoConnect) {
+                    if (serialConfig.autoConnect) {
                         // 连接设备
                         connectDevice(usbDevice)
                     }
@@ -184,8 +184,8 @@ abstract class SerialHelper(serialConfig: SerialConfig) : CheckFullFrame {
                         serialConfig.stopBits,
                         serialConfig.parity
                     )
-                    dtr = serialConfig.isDtr
-                    rts = serialConfig.isRts
+                    dtr = serialConfig.dtr
+                    rts = serialConfig.rts
                     onUsbStatusChangeListeners.forEach { it.onUsbConnect(usbDevice) }
                 }
             } catch (e: IOException) {

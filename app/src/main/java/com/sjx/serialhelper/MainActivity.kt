@@ -28,13 +28,15 @@ class MainActivity : AppCompatActivity() {
 
         // 串口配置
         val serialConfig = SerialConfig()
-        serialConfig.isAutoConnect = true // 默认连接第一个
+        serialConfig.autoConnect = true // 默认连接第一个
         serialConfig.baudRate = 9600 // 串口波特率
+        serialConfig.readInterval = 10 // ms，子线程读取，休眠间隔，双缓冲读取与写速率调整，默认10ms
+        serialConfig.doubleBufferSize = 20 // 双缓冲容量大小，循环覆盖缓存
+        serialConfig.dataMaxSize = 30000  // 当拼接数据未找到完整帧，长度大于30000清空，可根据实际情况适当调整
         serialHelper =object : SerialHelper(serialConfig){
             override fun isFullFrame(data: ByteArray): IntArray {
                 // 子线程 返回数据的起始索引和结束索引
-                intArrayOf(0, data.size)
-                return ByteUtils.getIndexRange(data, startBytes, endBytes)
+                return intArrayOf(0, data.size)
             }
         }
         serialHelper.addOnUsbDataListener(object : OnUsbDataListener {

@@ -1,6 +1,6 @@
 ## SerialHelper
 
-> 一个基于[usb-serial-for-android](https://github.com/mik3y/usb-serial-for-android "usb-serial-for-android")封装的Android串口通讯框架, 搭配[ConvertExt](https://github.com/swallowsonny/ConvertExt)实现ByteArray与基本数据类型的快速高效解析转换。该库配置简单，已用于某工业产品，波特率115200下稳定运行。
+> 一个基于[usb-serial-for-android](https://github.com/mik3y/usb-serial-for-android "usb-serial-for-android")封装的Android串口通讯框架, 搭配[ConvertExt](https://github.com/swallowsonny/ConvertExt)实现ByteArray与基本数据类型的快速高效解析转换。该库配置简单，已用于某工业产品，波特率高达921600
 
 [![Download](https://api.bintray.com/packages/swallowsonny/ext/serialhelper/images/download.svg?version=2.0.0) ](https://bintray.com/swallowsonny/ext/serialhelper/1.0.3/link)
 ### 功能简介
@@ -14,6 +14,7 @@
 - 串口连接状态监听
 - 串口数据发送及数据监听
 - 数据双缓冲，解决高波特率，大数据量下的混乱问题
+- 波特率高达921600, 有少数情况丢帧; 波特率115200稳定运行
 
 ### 快速开始
 #### 基本配置

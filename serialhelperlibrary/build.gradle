@@ -7,8 +7,8 @@ android {
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 6
-        versionName "2.0.0"
+        versionCode 7
+        versionName "2.0.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
     }
@@ -31,9 +31,6 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'androidx.appcompat:appcompat:1.0.2'
     implementation 'androidx.core:core-ktx:1.0.2'
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
 
     implementation 'com.github.mik3y:usb-serial-for-android:2.2.2'
 }
@@ -45,8 +42,8 @@ publish {
     userOrg = 'swallowsonny'      //bintray注册的用户名
     groupId = 'com.swallowsonny'         //compile引用时的第1部分groupId
     artifactId = 'serialhelper'     //compile引用时的第2部分项目名
-    publishVersion = '2.0.0'    //compile引用时的第3部分版本号
-    desc = '一个简单易用的Android串口通讯框架'//项目描述
+    publishVersion = '2.0.1'    //compile引用时的第3部分版本号
+    desc = '一个稳定简单易用的Android串口通讯帮助类，胜任高波特率、大数据量工作'//项目描述
     website = 'https://github.com/swallowsonny/SerialHelper' //github 托管地址
 }
 allprojects {
