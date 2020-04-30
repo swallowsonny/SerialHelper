@@ -28,7 +28,7 @@ maven {
 
 - 在app的build.gradle中添加
 ```
-implementation 'com.swallowsonny:serialhelper:2.0.0'
+implementation 'com.swallowsonny:serialhelper:2.0.1'
 ```
 
 - 在res/xml目录中添加[device_filter.xml](https://github.com/swallowsonny/SerialHelper/blob/master/app/src/main/res/xml/device_filter.xml)
