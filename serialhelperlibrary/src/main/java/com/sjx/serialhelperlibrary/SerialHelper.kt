@@ -261,7 +261,7 @@ abstract class SerialHelper(serialConfig: SerialConfig) : CheckFullFrame {
 
     fun onDestory() {
         mThread.interrupt()
-        mThread.join()
+//        mThread.join()
         mContext?.unregisterReceiver(mUsbPermissionActionReceiver)
         disconnectDevice()
         onUsbStatusChangeListeners.clear()
