@@ -27,7 +27,7 @@ object ByteUtils {
         }
 
         var endI = startI + startByteArray.size
-        while (endI < byteArray.size - endByteArray.size){
+        while (endI < byteArray.size - endByteArray.size + 1){
             // 查找
             var findEnd = true
             for(i in endByteArray.indices){
